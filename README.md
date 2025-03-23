@@ -35,7 +35,7 @@ Still training in bigger setting...
 
 For now, here are some results on a smaller dataset.
 
-![alt text](bpe_comparison.png)
+![alt text](./pngs/bpe_comparison.png)
 
 With this smaller dataset, it seems not much difference between BPE and SuperBPE.
 Maybe need to do more analysis.

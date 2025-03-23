@@ -191,5 +191,5 @@ if __name__ == "__main__":
     plt.legend()
     
     plt.tight_layout()
-    plt.savefig('bpe_comparison.png')
+    plt.savefig('./pngs/bpe_comparison.png')
     print("Visualizations saved to 'bpe_comparison.png'")

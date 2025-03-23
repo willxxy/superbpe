@@ -224,13 +224,11 @@ fn super_byte_pair_encoding(
         chunks.push(pretokenized_text);
     }
 
-    // Initialize vocabulary with bytes
     let mut vocab: HashMap<u32, String> = 
         (0..256).map(|idx| (idx, byte_to_string(idx as u8))).collect();
     let mut vocab_tokens: HashMap<u32, Vec<u32>> = (0..256).map(|idx| (idx, vec![idx])).collect();
     let mut merges = Vec::new();
     
-    // Initialize progress bar
     let pb = ProgressBar::new(num_merges as u64);
     pb.set_style(
         ProgressStyle::default_bar()
@@ -304,10 +302,8 @@ fn super_byte_pair_encoding(
                 merge(chunk, best_pair, new_id);
             }
             
-            // Update the vocabulary
             vocab.insert(new_id, new_token_str);
             
-            // Update token-to-bytes mapping
             let mut new_token = vocab_tokens.get(&best_pair.0).unwrap().clone();
             new_token.extend(vocab_tokens.get(&best_pair.1).unwrap());
             vocab_tokens.insert(new_id, new_token.clone());

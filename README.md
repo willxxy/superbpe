@@ -1,4 +1,4 @@
-# superbpe
+# SuperBPE: Space Travel for Language Models in Rust
 Unofficial implementation of [SuperBPE: Space Travel for Language Models](https://arxiv.org/abs/2503.13423) in Rust.
 Just for fun and there may be mistakes. Use with caution.
 

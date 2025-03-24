@@ -32,19 +32,32 @@ Just for fun and there may be mistakes. Use with caution.
 
 ## Results
 
-For now, here are some results on a smaller dataset with 500,000 characters.
+For now, here are some results on a smaller dataset (Pride and Prejudice) with 400,000 characters.
 
 ![alt text](./pngs/bpe_comparison.png)
 
 ![alt text](./pngs/tokenization_visualization.png)
 
-BPE Training time: **21.56 seconds**
-SuperBPE Training time: **7274.00 seconds**
+BPE Training time: **24.97 seconds**
+SuperBPE Training time: **8261.13 seconds**
+
+Final vocab size is determined as ≈ 256 + successful_merges.
+These results are with 5000 merges.
+We make the transition point at 3000 merges.
+
+## Analysis
 
 1. Token Length distribution plot looks pretty good. 
 2. Training is quite slow...which is expected.
 3. Compression rate is worse than BPE? This is just a simple inversion of their byte per token ratio.
-4. Looking at the tokenization visualization, it seems like SuperBPE is not merging as many tokens as BPE.
+4. Looking at the tokenization visualization, it seems like SuperBPE is merging okay (look at the word "sentence")?
 
+However, the Figure 1 in the original paper looks like this:
+
+![alt text](./pngs/fig1.png)
+
+SuperBPE does not show great benefits until a certain vocab size (~25k).
+Also the training is super slow...Maybe I am too impatient XD.
 Maybe need to do more analysis and check for bugs.
+Also may need to train on a larger dataset.
 Feel free to contribute!

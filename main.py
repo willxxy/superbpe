@@ -32,9 +32,12 @@ def download_text_dataset(url, max_length=None, cache_file="./data/dataset_cache
         with open(cache_file, 'w', encoding='utf-8') as f:
             f.write(text)
         
+        print(f"Original dataset size: {len(text)} characters")
         if max_length and len(text) > max_length:
             print(f"Truncating text to {max_length} characters")
             text = text[:max_length]
+        elif max_length is None:
+            print(f"No max length provided, using original dataset size")
             
         print(f"Downloaded dataset size: {len(text)} characters")
         return text
@@ -166,12 +169,12 @@ def visualize_bpe_comparison(bpe_metrics, super_metrics, encoded_bpe, encoded_su
 
 if __name__ == "__main__":
     dataset_url = "https://www.gutenberg.org/files/1342/1342-0.txt"
-    max_dataset_size = 500000  # characters
+    max_dataset_size = 500000  # characters for toy
     
     bpe_model_path = "./models/bpe_model.pkl"
     super_bpe_model_path = "./models/super_bpe_model.pkl"
     
-    text = download_text_dataset(dataset_url, max_dataset_size)
+    text = download_text_dataset(dataset_url, max_length=max_dataset_size)
     print(f"Dataset sample: {text[:200]}...")
     print(f"Dataset size: {len(text)} characters, {len(text.encode('utf-8'))} bytes")
     
@@ -184,9 +187,9 @@ if __name__ == "__main__":
     
     if not (os.path.exists(bpe_model_path) and os.path.exists(super_bpe_model_path)):
         print("\n=== Training Models ===")
-        num_merges = 5000
+        num_merges = 5256 - 256 # not counting the initial 256 tokens which is the byte tokens
         num_threads = multiprocessing.cpu_count()
-        transition_point = 256 + (num_merges // 2)
+        transition_point = 3000
         
         print("\n=== Training Standard BPE ===")
         start_time = time.time()

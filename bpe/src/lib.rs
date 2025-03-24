@@ -139,17 +139,12 @@ fn super_byte_pair_encoding(
         .unwrap();
     let pool = Arc::new(pool);
 
-    // Define regex patterns for pretokenization - handle errors properly
+    // Define regex patterns
     let whitespace_regex = match Regex::new(r"\p{L}+| ?[^\s\p{L}\p{N}]+|\s+") {
         Ok(regex) => regex,
         Err(e) => return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to compile whitespace regex: {}", e))),
     };
     
-    let _digit_regex = match Regex::new(r"\d{3}") {
-        Ok(regex) => regex,
-        Err(e) => return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Failed to compile digit regex: {}", e))),
-    };
-
     // Step 1: Pretokenize the text (only for stage 1)
     let mut pretokenized_text = String::new();
     let mut in_digit_sequence = false;
@@ -223,10 +218,10 @@ fn super_byte_pair_encoding(
         chunks.push(pretokenized_text);
     }
 
-    let mut vocab: HashMap<u32, String> = 
+    let mut vocab: FxHashMap<u32, String> = 
         (0..256).map(|idx| (idx, byte_to_string(idx as u8))).collect();
-    let mut vocab_tokens: HashMap<u32, Vec<u32>> = (0..256).map(|idx| (idx, vec![idx])).collect();
-    let mut merges = Vec::new();
+    let mut vocab_tokens: FxHashMap<u32, Vec<u32>> = (0..256).map(|idx| (idx, vec![idx])).collect();
+    let mut merges = Vec::with_capacity(num_merges);
     
     let pb = ProgressBar::new(num_merges as u64);
     pb.set_style(
@@ -249,22 +244,33 @@ fn super_byte_pair_encoding(
             // Transition to stage 2: merge all chunks
             pb.set_message("Transitioning to stage 2: merging all chunks");
             
-            let mut merged_ids = Vec::new();
+            let total_capacity: usize = chunk_ids.iter().map(|chunk| chunk.len()).sum();
+            let mut merged_ids = Vec::with_capacity(total_capacity);
             for chunk in &chunk_ids {
-                merged_ids.extend(chunk.clone());
+                merged_ids.extend_from_slice(chunk);
             }
             chunk_ids = vec![merged_ids];
             
             stage = 2;
         }
         
-        let mut pairs = FxHashMap::default();
-        for chunk in &chunk_ids {
-            let chunk_pairs = pool.install(|| get_stats(&chunk));
-            for (pair, count) in chunk_pairs {
-                *pairs.entry(pair).or_insert(0) += count;
+        let pairs = if chunk_ids.len() == 1 {
+            pool.install(|| get_stats(&chunk_ids[0]))
+        } else {
+            let mut pairs = FxHashMap::default();
+            let chunk_pairs: Vec<_> = pool.install(|| {
+                chunk_ids.par_iter()
+                    .map(|chunk| get_stats(chunk))
+                    .collect()
+            });
+            
+            for chunk_pair in chunk_pairs {
+                for (pair, count) in chunk_pair {
+                    *pairs.entry(pair).or_insert(0) += count;
+                }
             }
-        }
+            pairs
+        };
         
         if pairs.is_empty() {
             break;
@@ -281,8 +287,7 @@ fn super_byte_pair_encoding(
                 continue;
             }
             
-            let new_token_str = pair_str.clone();
-            let word_count = new_token_str.split_whitespace().count();
+            let word_count = pair_str.split_whitespace().count();
             
             // Skip if token contains more than 4 words
             if word_count > 4 {
@@ -295,7 +300,7 @@ fn super_byte_pair_encoding(
                 merge(chunk, best_pair, new_id);
             }
             
-            vocab.insert(new_id, new_token_str);
+            vocab.insert(new_id, pair_str);
             
             let mut new_token = vocab_tokens.get(&best_pair.0).unwrap().clone();
             new_token.extend(vocab_tokens.get(&best_pair.1).unwrap());
@@ -313,13 +318,14 @@ fn super_byte_pair_encoding(
     
     pb.finish_with_message("SuperBPE completed");
     
-    // Flatten chunk_ids for final output - should be just one chunk in stage 2
     let ids = chunk_ids.into_iter().flatten().collect();
     
     let total_duration = start_total.elapsed();
     println!("Total time for super_byte_pair_encoding: {:?}", total_duration);
     
-    Ok((ids, vocab, merges))
+    let vocab_hashmap: HashMap<u32, String> = vocab.into_iter().collect();
+    
+    Ok((ids, vocab_hashmap, merges))
 }
 
 

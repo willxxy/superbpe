@@ -183,7 +183,6 @@ fn super_byte_pair_encoding(
         }
     }
 
-    // Don't forget to process any remaining digits
     if in_digit_sequence {
         let mut processed_digits = String::new();
         let digits: Vec<char> = digit_buffer.chars().collect();
@@ -241,7 +240,6 @@ fn super_byte_pair_encoding(
     let mut current_vocab_size = 256;
     let mut stage = 1;
     
-    // Convert chunks to byte IDs
     let mut chunk_ids: Vec<Vec<u32>> = chunks.iter()
         .map(|chunk| chunk.as_bytes().iter().map(|&b| b as u32).collect())
         .collect();
@@ -251,7 +249,6 @@ fn super_byte_pair_encoding(
             // Transition to stage 2: merge all chunks
             pb.set_message("Transitioning to stage 2: merging all chunks");
             
-            // Merge all chunks into a single sequence
             let mut merged_ids = Vec::new();
             for chunk in &chunk_ids {
                 merged_ids.extend(chunk.clone());
@@ -261,7 +258,6 @@ fn super_byte_pair_encoding(
             stage = 2;
         }
         
-        // Collect pair statistics across all chunks
         let mut pairs = FxHashMap::default();
         for chunk in &chunk_ids {
             let chunk_pairs = pool.install(|| get_stats(&chunk));
@@ -274,7 +270,6 @@ fn super_byte_pair_encoding(
             break;
         }
         
-        // Find the best pair to merge
         let best = pool
             .install(|| pairs.par_iter().max_by_key(|&(_, count)| count))
             .and_then(|(&pair, _)| Some(pair));
@@ -286,7 +281,6 @@ fn super_byte_pair_encoding(
                 continue;
             }
             
-            // Calculate the new token string and check word count
             let new_token_str = pair_str.clone();
             let word_count = new_token_str.split_whitespace().count();
             
@@ -297,7 +291,6 @@ fn super_byte_pair_encoding(
             
             let new_id = 256 + i as u32;
             
-            // Perform the merge in each chunk
             for chunk in &mut chunk_ids {
                 merge(chunk, best_pair, new_id);
             }

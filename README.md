@@ -32,11 +32,19 @@ Just for fun and there may be mistakes. Use with caution.
 
 ## Results
 
-For now, here are some results on a smaller dataset.
+For now, here are some results on a smaller dataset with 500,000 characters.
 
 ![alt text](./pngs/bpe_comparison.png)
 
-Token Length distribution plot looks pretty good. Training is quite slow...
-Maybe need to do more analysis.
-Also there may be some mistakes in the implementation.
+![alt text](./pngs/tokenization_visualization.png)
+
+BPE Training time: **21.56 seconds**
+SuperBPE Training time: **7274.00 seconds**
+
+1. Token Length distribution plot looks pretty good. 
+2. Training is quite slow...which is expected.
+3. Compression rate is worse than BPE? This is just a simple inversion of their byte per token ratio.
+4. Looking at the tokenization visualization, it seems like SuperBPE is not merging as many tokens as BPE.
+
+Maybe need to do more analysis and check for bugs.
 Feel free to contribute!

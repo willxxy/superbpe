@@ -31,13 +31,12 @@ Just for fun and there may be mistakes. Use with caution.
 1. `python main.py`
 
 ## Results
-Still training in bigger setting...
 
 For now, here are some results on a smaller dataset.
 
 ![alt text](./pngs/bpe_comparison.png)
 
-With this smaller dataset, it seems not much difference between BPE and SuperBPE.
+Token Length distribution plot looks pretty good. Training is quite slow...
 Maybe need to do more analysis.
 Also there may be some mistakes in the implementation.
 Feel free to contribute!

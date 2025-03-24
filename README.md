@@ -47,10 +47,9 @@ We make the transition point at 3000 merges.
 
 ## Analysis
 
-1. Token Length distribution plot looks pretty good. 
-2. Training is quite slow...which is expected.
-3. Compression rate is worse than BPE? This is just a simple inversion of their byte per token ratio.
-4. Looking at the tokenization visualization, it seems like SuperBPE is merging okay (look at the word "sentence")?
+1. Training is quite slow...which is expected.
+2. Compression rate is worse than BPE? This is just a simple inversion of their byte per token ratio.
+3. Looking at the tokenization visualization, it seems like SuperBPE is merging okay (look at the word "sentence")?
 
 However, the Figure 1 in the original paper looks like this:
 

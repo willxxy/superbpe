@@ -2,6 +2,9 @@
 Unofficial implementation of [SuperBPE: Space Travel for Language Models](https://arxiv.org/abs/2503.13423) in Rust.
 Just for fun and there may be mistakes. Use with caution.
 
+The official implementation is out [here](https://github.com/PythonNut/superbpe). 
+I need to compare with their official implementation. 
+
 ## System info
 - OS: MacOS Sequoia 15.3.2
 - Chip: Apple M2 Max
